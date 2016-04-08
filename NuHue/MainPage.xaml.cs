@@ -25,6 +25,8 @@ namespace NuHue
     /// </summary>
     public sealed partial class MainPage : Page
     {
+        LightCommand command = new LightCommand();
+        
         public MainPage()
         {
             this.InitializeComponent();
@@ -32,16 +34,15 @@ namespace NuHue
 
         private void onButton_Click(object sender, RoutedEventArgs e)
         {
-            var command = new LightCommand();
-            command.On = true;
+            command.TurnOn();
             App.client.SendCommandAsync(command);
         }
 
         private void offButton_Click(object sender, RoutedEventArgs e)
         {
-            var command = new LightCommand();
             command.TurnOff();
             App.client.SendCommandAsync(command);
+            
         }
     }
 }
