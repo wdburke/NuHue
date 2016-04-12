@@ -10,13 +10,14 @@ using Q42.HueApi.Converters;
 using Q42.HueApi.WinRT;
 using Q42.HueApi.Interfaces;
 using Windows.Security.ExchangeActiveSyncProvisioning;
+using Windows.Storage;
 
 namespace NuHue
 {
     public partial class App : Application
     {
         //apiKey is used to pass the registered key inside the app.
-        public static string apiKey { get; set; } = "";
+        public static string apiKey { get; set; }
         public static IBridgeLocator locator = new HttpBridgeLocator();
         public string appKey;
         public static ILocalHueClient client;
@@ -24,6 +25,43 @@ namespace NuHue
         public static List<Light> lights;
         public const bool onState = true;
         public const bool offState = false;
+        public const string apiFileName = "apiKey.json";
+        public static StorageFolder storageFolder = ApplicationData.Current.LocalFolder;
+        public static StorageFile apiKeyFile;
+
+        private async Task SettingsData()
+        {
+            try
+            {
+                apiKey = await ReadData();
+            }
+            catch
+            {
+                WriteData();
+            }
+            finally
+            {
+                BridgeLocation();
+            }
+
+        }
+
+        private async Task<string> ReadData()
+        {
+            var fileText = "";
+            apiKeyFile = await storageFolder.GetFileAsync(apiFileName);
+            fileText = await FileIO.ReadTextAsync(apiKeyFile);
+            if(string.IsNullOrEmpty(fileText))
+            {
+                throw new NullReferenceException("File text is null or file does not exist");
+            }
+            return fileText;
+        }
+        private async Task WriteData()
+        {
+            await storageFolder.CreateFileAsync(apiFileName, CreationCollisionOption.ReplaceExisting);
+            await FileIO.WriteTextAsync(apiKeyFile, apiKey);
+        }
 
         /// <summary>
         /// Try to connect to the bridge and register the application client
@@ -45,7 +83,6 @@ namespace NuHue
         {
             // get the device manufacturer and model name
             EasClientDeviceInformation eas = new EasClientDeviceInformation();
-            var DeviceManufacturer = eas.SystemManufacturer;
             var DeviceModel = eas.SystemProductName;
             return DeviceModel;
         }

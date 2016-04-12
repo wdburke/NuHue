@@ -33,7 +33,7 @@ namespace NuHue
                 Microsoft.ApplicationInsights.WindowsCollectors.Metadata |
                 Microsoft.ApplicationInsights.WindowsCollectors.Session);
             this.InitializeComponent();
-            this.BridgeLocation();
+            SettingsData();
             this.Suspending += OnSuspending;
         }
 
